@@ -13,6 +13,8 @@ if not pid.isnumeric():
         print("Couldn't find pid, trying again in 10 seconds...")
         time.sleep(10)
         pid = Process.get_pid_by_name(process_name)
+else:
+    pid = int(pid)
 
 with Process.open_process(pid) as requested_process:
     addresses: List[int] = None
