@@ -39,22 +39,15 @@ with Process.open_process(pid) as requested_process:
             addresses = requested_process.search_all_memory(current_value) if not addresses else\
                         requested_process.search_addresses(addresses, current_value)
         
-        address_expression = "\n".join([hex(address) for address in addresses][:100])
-        print(f"Found {len(addresses)} matches for value {current_value.value}:\n{address_expression}\n")
+        address_expression = "\n".join([hex(address) for address in addresses][:15])
+        print(f"Found {len(addresses)} matches for value {current_value.value}:\n{address_expression}")
 
         while True:
             if len(addresses) == 0:
                 break
 
-            user_input = input("Enter 'r' to reset the current search, enter 'v' to show the value of the current addresses, enter 'a' to find addresses which point to the current matches, anything else to continue filtering: ")
-            print(user_input)
-            if user_input == "a":
-                pointer_addresses = set()
-                for address in addresses:
-                    pointer_addresses.update(requested_process.search_all_memory(ctypes.c_int(address)))
-                addresses = pointer_addresses
-
-            elif user_input == "r":
+            user_input = input("\n[r] reset, [v] show current values, [Enter] continue filtering: ")
+            if user_input == "r":
                 addresses = []
                 print("Addresses were reset.")
                 break
