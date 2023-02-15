@@ -4,20 +4,24 @@ from typing import *
 
 
 class MemoryReader:
-    def __init__(self, p_id: int = None, p_name: str = None) -> None:
+    def __init__(self, p_id: int = None, p_name: str = None, process: Process = None) -> None:
         """Initialises a MemoryReader, used to find the memory address of a specific value, and read it henceforth.
 
         Args:
             c_type (_type_): The c_types type to search for.
             p_id (int, optional): The process id. Defaults to None.
             p_name (str, optional): _description_. Defaults to None.
+            process (Process, optional): In case of using multiple MemoryReaders, pass the reference here. Defaults to None.
         """
-        if p_id:
-            self.process_id = p_id
+        if not process:
+            if p_id:
+                self.process_id = p_id
+            else:
+                self.process_id = Process.get_pid_by_name(p_name)
+            
+            self.process: Process = Process(self.process_id)
         else:
-            self.process_id = Process.get_pid_by_name(p_name)
-        
-        self.process: Process = Process(self.process_id)
+            self.process = process
         self.addresses = []
         self.buffer = None
     
@@ -66,9 +70,9 @@ class MemoryReader:
     def reset_filter(self):
         """Resets the addresses which are used to search values. Essentially starts searching anew.
         """
-        self.addresses = None
+        self.addresses = []
 
-    def read_values(self, full_string: bool = False) -> Dict[int, Union[int, str, float]]:
+    def read_values(self, full_string: bool = False) -> List[Union[int, str, float]]:
         """Returns the values found at self.addresses in the memory.
         
         Args:
@@ -76,9 +80,9 @@ class MemoryReader:
                 or only starting at the memory address and using the current buffer length.
 
         Returns:
-            Dict[int, Union[int, str, float]]: A dict of the address as key and found value as value.
+            List[Union[int, str, float]]: A list with the address values.
         """
-        values = {}
+        values = []
         
         for address in self.addresses:
             starting_address = address
@@ -108,7 +112,7 @@ class MemoryReader:
                 self.buffer = (ctypes.c_char * (address - starting_address + 2048)).from_buffer(b)
                         
             self.process.read_memory(starting_address, self.buffer)
-            values[address] = self.buffer.value
+            values.append(self.buffer.value)
         
         return values
     

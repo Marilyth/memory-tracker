@@ -44,7 +44,7 @@ if __name__ == "__main__":
                 break
 
             elif user_input == "v":
-                values = reader.read_values()
+                values = reader.read_values(True)
                 print()
                 for key in values:
                     print(f"{hex(key)}: {values[key]}")
