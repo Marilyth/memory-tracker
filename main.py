@@ -46,8 +46,8 @@ if __name__ == "__main__":
             elif user_input == "v":
                 values = reader.read_values(True)
                 print()
-                for key in values:
-                    print(f"{hex(key)}: {values[key]}")
+                for i, value in enumerate(values):
+                    print(f"{hex(reader.addresses[i])}: {value}\n")
 
             else:
                 break

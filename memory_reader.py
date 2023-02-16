@@ -40,7 +40,10 @@ class MemoryReader:
             b.extend(value.encode("utf-8"))
             return (ctypes.c_char * len(b)).from_buffer(b)
         elif type(value) == int:
-            return ctypes.c_int(value)
+            if abs(value) <= 2147483647:
+                return ctypes.c_int(value)
+            else:
+                return ctypes.c_long(value)
         elif type(value) == float:
             return ctypes.c_float(value)
     
