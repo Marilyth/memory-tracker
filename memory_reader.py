@@ -37,11 +37,14 @@ class MemoryReader:
         """
         if type(value) == str:
             b = bytearray()
-            b.extend(value.encode("utf-8"))
+            b.extend(value.encode("ascii"))
+            # Print the bytearray as a string of hex values.
+            print(" ".join("{:02x}".format(x) for x in b))
+        
             return (ctypes.c_char * len(b)).from_buffer(b)
         elif type(value) == int:
             if abs(value) <= 2147483647:
-                return ctypes.c_int(value)
+                return ctypes.c_long(value)
             else:
                 return ctypes.c_long(value)
         elif type(value) == float:
@@ -66,7 +69,7 @@ class MemoryReader:
         if self.addresses:
             self.addresses = self.process.search_addresses(self.addresses, self.buffer)
         else:
-            self.addresses = self.process.search_all_memory(self.buffer)
+            self.addresses = self.process.search_all_memory(self.buffer, False)
         
         return self.addresses[:]
             
@@ -118,6 +121,23 @@ class MemoryReader:
             values.append(self.buffer.value)
         
         return values
+    
+    def get_context(self, address: int, context_length: int = 15) -> Dict[int, ctypes.c_byte]:
+        """Returns the context of the address in the memory.
+
+        Args:
+            address (int): The address to get the context for.
+            context_length (int, optional): The length of the context to return. Defaults to 15.
+
+        Returns:
+            str: The context of the address.
+        """
+        context = {}
+
+        for i in range(address - context_length, address + context_length + 1):
+            context[i] = self.process.read_memory(i, ctypes.c_byte())
+        
+        return context
     
     def write_values(self, value: Union[int, str, float]) -> Dict[int, Union[int, str, float]]:
         """Writes the value to all currently saved addresses.

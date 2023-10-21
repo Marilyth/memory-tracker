@@ -37,7 +37,7 @@ if __name__ == "__main__":
             if len(reader.addresses) == 0:
                 break
 
-            user_input = input("\n[r] reset, [v] show current values, [Enter] continue filtering: ")
+            user_input = input("\n[r] reset, [v] show current values, [c] show context around values, [Enter] continue filtering: ")
             if user_input == "r":
                 reader.reset_filter()
                 print("Addresses were reset.")
@@ -48,6 +48,18 @@ if __name__ == "__main__":
                 print()
                 for i, value in enumerate(values):
                     print(f"{hex(reader.addresses[i])}: {value}\n")
+
+            elif user_input == "c":
+                context_length = int(input("Enter context length: "))
+
+                for address in reader.addresses:
+                    context = reader.get_context(address, context_length)
+                    byte_array_hex = ""
+                    for address in sorted(context.keys()):
+                        byte = context[address]
+                        byte_array_hex += hex(byte.value).split("x")[1]
+                    
+                    print(f"{hex(address)} +- {context_length}: {byte_array_hex}")
 
             else:
                 break
